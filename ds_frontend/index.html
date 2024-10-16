@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flight Search and Booking System</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #fff; /* Background set to white */
+            color: #333; /* Text color set to dark gray */
+        }
+        .container {
+            padding: 30px;
+            margin-top: 30px;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #007bff; /* Bootstrap primary blue */
+        }
+        .form-group label {
+            color: #555; /* Label color set to dark gray */
+        }
+        .form-control {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            color: #495057;
+            border-radius: 5px; /* Rounded corners */
+        }
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        .btn {
+            margin-top: 10px;
+            color: #fff;
+            border-radius: 5px; /* Rounded corners */
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border: none;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .response {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background-color: #f8f9fa; /* Light gray background */
+            padding: 15px;
+            border-radius: 5px; /* Rounded corners */
+            border: 1px solid #ced4da;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flight Search and Booking System</h1>
+
+        <!-- Search Flights by Origin and Destination -->
+        <h2>Search Flights by Origin and Destination</h2>
+        <form id="queryBySrcDesForm">
+            <div class="form-group">
+                <label>Origin:</label>
+                <input type="text" name="source" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Destination:</label>
+                <input type="text" name="destination" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Search Flights</button>
+            <!-- Response Display Area -->
+            <div id="responseSrcDes" class="response"></div>
+        </form>
+
+        <!-- Search Flight by ID -->
+        <h2>Search Flight by ID</h2>
+        <form id="queryByIdForm">
+            <div class="form-group">
+                <label>Flight ID:</label>
+                <input type="number" name="id" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Search Flight</button>
+            <!-- Response Display Area -->
+            <div id="responseById" class="response"></div>
+        </form>
+
+        <!-- Book Seats by Flight ID -->
+        <h2>Book Seats by Flight ID</h2>
+        <form id="makeReservationForm">
+            <div class="form-group">
+                <label>Flight ID:</label>
+                <input type="number" name="id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Number of Seats:</label>
+                <input type="number" name="seats" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Book Seats</button>
+            <!-- Response Display Area -->
+            <div id="responseReservation" class="response"></div>
+        </form>
+
+        <!-- Subscribe to Flight Updates -->
+        <h2>Subscribe to Flight Updates</h2>
+        <form id="subscribeForm">
+            <div class="form-group">
+                <label>Flight ID:</label>
+                <input type="number" name="id" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Time Interval (minutes):</label>
+                <input type="number" name="timeinterval" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-warning btn-block">Subscribe</button>
+            <!-- Response Display Area -->
+            <div id="responseSubscribe" class="response"></div>
+        </form>
+    </div>
+
+    <!-- Include Bootstrap JS and Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Front-end Scripts -->
+    <script>
+        function consistent_receive(timeinterval){
+            while(true){
+                client.once('message', (msg, rinfo) => {
+                    str = msg.toString();
+                    consol.log(str);
+                });
+                timeout = setTimeout(() => {
+                  console.log('subscribe become invalid after: ' + timeinterval);
+              }, timeinterval);
+            }
+
+        }
+        // Search Flights by Origin and Destination
+        document.getElementById('queryBySrcDesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const source = e.target.source.value;
+            const destination = e.target.destination.value;
+            fetch('/api/queryBySrcAndDes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({source, destination})
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('responseSrcDes').innerText = data;
+            });
+        });
+
+        // Search Flight by ID
+        document.getElementById('queryByIdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = e.target.id.value;
+            fetch('/api/queryById', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id})
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('responseById').innerText = data;
+            });
+        });
+
+        // Book Seats by Flight ID
+        document.getElementById('makeReservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = e.target.id.value;
+            const seats = e.target.seats.value;
+            fetch('/api/makeReservation', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id, seats})
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('responseReservation').innerText = data;
+            });
+        });
+
+        // Subscribe to Flight Updates
+        document.getElementById('subscribeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = e.target.id.value;
+            const timeinterval = e.target.timeinterval.value;
+            fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id, timeinterval})
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('responseSubscribe').innerText = data;
+            });
+        });
+    </script>
+</body>
+</html>
